@@ -176,6 +176,53 @@ export default function App() {
         {/* ══════════ DAILY VIEW ══════════ */}
         {tab === 'daily' && (
           <>
+            {/* Delivery Date dropdown option at top-left (no calendar logo) */}
+            <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'flex-start', gap:12, marginBottom:16}}>
+              <label style={{color:'#e2e8f0', fontSize:13, fontWeight:600, display:'flex', alignItems:'center', gap:8}}>
+                <span>Delivery Date:</span>
+                <select style={S.select} value={selDate} onChange={e => setSelDate(e.target.value)}>
+                  {dates.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </label>
+
+              <div style={{display:'flex', alignItems:'center', gap:6}}>
+                <button
+                  onClick={goPrev}
+                  disabled={!hasPrev}
+                  style={{
+                    background: hasPrev ? '#1e293b' : 'transparent',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: hasPrev ? '#e2e8f0' : '#475569',
+                    padding: '5px 12px',
+                    borderRadius: 6,
+                    cursor: hasPrev ? 'pointer' : 'not-allowed',
+                    fontSize: 12,
+                    fontWeight: 600
+                  }}>
+                  ← Prev
+                </button>
+                <button
+                  onClick={goNext}
+                  disabled={!hasNext}
+                  style={{
+                    background: hasNext ? '#1e293b' : 'transparent',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: hasNext ? '#e2e8f0' : '#475569',
+                    padding: '5px 12px',
+                    borderRadius: 6,
+                    cursor: hasNext ? 'pointer' : 'not-allowed',
+                    fontSize: 12,
+                    fontWeight: 600
+                  }}>
+                  Next →
+                </button>
+              </div>
+
+              <span style={{color:'#64748b', fontSize:12}}>
+                Cutoff: <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong> (D-1 Gate Closure)
+              </span>
+            </div>
+
             {/* Week-wise horizontal calendar card */}
             <div style={{
               background:'#0f172a',
@@ -185,66 +232,18 @@ export default function App() {
               marginBottom:24,
               boxShadow:'0 4px 16px rgba(0,0,0,0.25)'
             }}>
-              {/* Calendar header with quick navigation */}
               <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', marginBottom:14, gap:12}}>
                 <div style={{display:'flex', alignItems:'center', gap:10}}>
-                  <span style={{fontSize:15, fontWeight:700, color:'#f8fafc'}}>
-                    📅 January 2026 Delivery Calendar
+                  <span style={{fontSize:14, fontWeight:700, color:'#f8fafc', textTransform:'uppercase', letterSpacing:'0.04em'}}>
+                    January 2026 Delivery Calendar — Week-Wise View
                   </span>
                   <span style={{fontSize:12, color:'#64748b'}}>
-                    Week-wise grid · Click any day to inspect
-                  </span>
-                </div>
-
-                <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', gap:8}}>
-                  <button
-                    onClick={goPrev}
-                    disabled={!hasPrev}
-                    style={{
-                      background: hasPrev ? '#1e293b' : 'transparent',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: hasPrev ? '#e2e8f0' : '#475569',
-                      padding: '4px 10px',
-                      borderRadius: 6,
-                      cursor: hasPrev ? 'pointer' : 'not-allowed',
-                      fontSize: 12,
-                      fontWeight: 600
-                    }}>
-                    ← Prev
-                  </button>
-
-                  <span style={{
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    padding: '4px 12px',
-                    borderRadius: 6,
-                    fontSize: 12,
-                    fontWeight: 700
-                  }}>
-                    {selDate}
-                  </span>
-
-                  <button
-                    onClick={goNext}
-                    disabled={!hasNext}
-                    style={{
-                      background: hasNext ? '#1e293b' : 'transparent',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: hasNext ? '#e2e8f0' : '#475569',
-                      padding: '4px 10px',
-                      borderRadius: 6,
-                      cursor: hasNext ? 'pointer' : 'not-allowed',
-                      fontSize: 12,
-                      fontWeight: 600
-                    }}>
-                    Next →
-                  </button>
-
-                  <span style={{color:'#64748b', fontSize:12, marginLeft:6}}>
-                    Cutoff: <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong>
+                    (Click any day to switch date)
                   </span>
                 </div>
               </div>
+
+
 
               {/* 7-column horizontal week-wise grid */}
               <div style={{display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:6}}>
@@ -434,18 +433,22 @@ export default function App() {
               <p style={{color:'#64748b', fontSize:12, margin:'0 0 16px'}}>
                 High MAE days = stormy or rapidly changing wind conditions
               </p>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={monthData.daily.map(d => ({
-                  day:  d.date.slice(8),      // just the day number
-                  mae:  d.metrics.mae,
-                  bias: d.metrics.bias,
-                }))}>
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart
+                  data={monthData.daily.map(d => ({
+                    day:  d.date.slice(8),      // just the day number
+                    mae:  d.metrics.mae,
+                    bias: d.metrics.bias,
+                  }))}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 22 }}
+                >
                   <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3"/>
-                  <XAxis dataKey="day" stroke="#475569" tick={{fontSize:11}} label={{value:'Day of January', position:'insideBottom', offset:-2, fill:'#64748b', fontSize:11}}/>
+                  <XAxis dataKey="day" stroke="#475569" tick={{fontSize:11}}
+                    label={{value:'Day of January', position:'insideBottom', offset:-10, fill:'#94a3b8', fontSize:12}}/>
                   <YAxis stroke="#475569" tick={{fontSize:11}} unit=" MW"/>
                   <Tooltip {...tooltipStyle} labelFormatter={d=>`Jan ${d}, 2026`}
                     formatter={(v,n) => [`${v.toLocaleString()} MW`, n==='mae'?'MAE':'Bias']}/>
-                  <Legend/>
+                  <Legend wrapperStyle={{ paddingTop: 26 }}/>
                   <Bar dataKey="mae"  name="mae"  fill="#38bdf8" radius={[4,4,0,0]}/>
                   <Bar dataKey="bias" name="bias" fill="#f59e0b" radius={[4,4,0,0]}/>
                 </BarChart>
@@ -491,11 +494,6 @@ export default function App() {
           </>
         )}
       </main>
-
-      {/* Footer */}
-      <footer style={{borderTop:'1px solid rgba(255,255,255,0.06)', textAlign:'center', padding:'18px', color:'#64748b', fontSize:12}}>
-        Data: Elexon BMRS (FUELHH & WINDFOR) · January 2026 · Built with React + Python (FastAPI)
-      </footer>
     </div>
   )
 }
