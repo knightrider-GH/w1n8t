@@ -85,6 +85,7 @@ export default function App() {
   const [dayData,    setDayData]    = useState(null)         // {data, metrics}
   const [monthData,  setMonthData]  = useState(null)         // {overall, daily}
   const [loading,    setLoading]    = useState(true)
+  const [openPicker, setOpenPicker] = useState(false)        // toggle small calendar dropdown preview
 
   // Load available dates once
   useEffect(() => {
@@ -176,24 +177,171 @@ export default function App() {
         {/* ══════════ DAILY VIEW ══════════ */}
         {tab === 'daily' && (
           <>
-            {/* Delivery Date dropdown option at top-left (no calendar logo) */}
-            <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'flex-start', gap:12, marginBottom:16}}>
-              <label style={{color:'#e2e8f0', fontSize:13, fontWeight:600, display:'flex', alignItems:'center', gap:8}}>
-                <span>Delivery Date:</span>
-                <select style={S.select} value={selDate} onChange={e => setSelDate(e.target.value)}>
-                  {dates.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </label>
+            {/* Delivery Date dropdown option with small popup calendar preview */}
+            <div style={{
+              display:'flex',
+              flexWrap:'wrap',
+              alignItems:'center',
+              justifyContent:'flex-start',
+              gap:12,
+              marginBottom:22,
+              position:'relative'
+            }}>
+              {/* Dropdown trigger button */}
+              <div style={{display:'flex', alignItems:'center', gap:8, position:'relative'}}>
+                <span style={{color:'#94a3b8', fontSize:13, fontWeight:600}}>Delivery Date:</span>
+                <button
+                  type="button"
+                  onClick={() => setOpenPicker(!openPicker)}
+                  style={{
+                    background: '#1e293b',
+                    border: openPicker ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)',
+                    color: '#f8fafc',
+                    borderRadius: 8,
+                    padding: '7px 14px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    boxShadow: openPicker ? '0 0 12px rgba(56, 189, 248, 0.35)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{selDate}</span>
+                  <span style={{
+                    fontSize: 10,
+                    color: '#94a3b8',
+                    transform: openPicker ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.15s ease'
+                  }}>
+                    ▼
+                  </span>
+                </button>
 
+                {/* Floating small calendar preview dropdown */}
+                {openPicker && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      onClick={() => setOpenPicker(false)}
+                      style={{position:'fixed', inset:0, zIndex:40}}
+                    />
+
+                    {/* Small preview card */}
+                    <div style={{
+                      position:'absolute',
+                      top:'calc(100% + 8px)',
+                      left: 95,
+                      zIndex:50,
+                      background:'#0f172a',
+                      border:'1px solid rgba(255,255,255,0.12)',
+                      borderRadius:14,
+                      padding:'14px 16px',
+                      width: 320,
+                      boxShadow:'0 16px 40px rgba(0,0,0,0.6)',
+                    }}>
+                      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, paddingBottom:8, borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
+                        <span style={{fontSize:13, fontWeight:700, color:'#f8fafc'}}>
+                          January 2026
+                        </span>
+                        <span style={{fontSize:11, color:'#64748b'}}>
+                          Select date
+                        </span>
+                      </div>
+
+                      {/* Weekday headers */}
+                      <div style={{display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:4, marginBottom:6}}>
+                        {DAYS_OF_WEEK.map(w => (
+                          <div key={w} style={{textAlign:'center', fontSize:10, fontWeight:700, color:'#64748b', textTransform:'uppercase'}}>
+                            {w.slice(0, 2)}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Small calendar preview grid */}
+                      <div style={{display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:4}}>
+                        {CALENDAR_CELLS.map((dayNum, idx) => {
+                          if (!dayNum) {
+                            return <div key={`empty-${idx}`} style={{opacity:0}} />
+                          }
+                          const dateStr = `2026-01-${String(dayNum).padStart(2, '0')}`
+                          const isSelected = selDate === dateStr
+                          const dayMetric = monthData?.daily?.find(x => x.date === dateStr)?.metrics
+
+                          return (
+                            <button
+                              key={dateStr}
+                              type="button"
+                              onClick={() => {
+                                setSelDate(dateStr)
+                                setOpenPicker(false)
+                              }}
+                              style={{
+                                background: isSelected
+                                  ? 'linear-gradient(135deg, #0284c7, #0369a1)'
+                                  : 'rgba(255,255,255,0.03)',
+                                border: isSelected
+                                  ? '1px solid #38bdf8'
+                                  : '1px solid rgba(255,255,255,0.06)',
+                                borderRadius: 6,
+                                padding: '4px 2px',
+                                cursor: 'pointer',
+                                textAlign: 'center',
+                                transition: 'all 0.15s ease',
+                                boxShadow: isSelected ? '0 0 10px rgba(56, 189, 248, 0.4)' : 'none',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: 36,
+                              }}
+                              onMouseEnter={e => {
+                                if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                              }}
+                              onMouseLeave={e => {
+                                if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+                              }}
+                            >
+                              <span style={{
+                                fontSize: 12,
+                                fontWeight: isSelected ? 800 : 600,
+                                color: isSelected ? '#ffffff' : '#e2e8f0',
+                              }}>
+                                {dayNum}
+                              </span>
+                              {dayMetric && (
+                                <span style={{
+                                  fontSize: 8,
+                                  fontWeight: 600,
+                                  color: isSelected
+                                    ? '#e0f2fe'
+                                    : dayMetric.accuracy >= 80 ? '#4ade80' : '#fb923c',
+                                }}>
+                                  {dayMetric.accuracy}%
+                                </span>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Prev / Next buttons */}
               <div style={{display:'flex', alignItems:'center', gap:6}}>
                 <button
+                  type="button"
                   onClick={goPrev}
                   disabled={!hasPrev}
                   style={{
                     background: hasPrev ? '#1e293b' : 'transparent',
                     border: '1px solid rgba(255,255,255,0.08)',
                     color: hasPrev ? '#e2e8f0' : '#475569',
-                    padding: '5px 12px',
+                    padding: '6px 12px',
                     borderRadius: 6,
                     cursor: hasPrev ? 'pointer' : 'not-allowed',
                     fontSize: 12,
@@ -202,13 +350,14 @@ export default function App() {
                   ← Prev
                 </button>
                 <button
+                  type="button"
                   onClick={goNext}
                   disabled={!hasNext}
                   style={{
                     background: hasNext ? '#1e293b' : 'transparent',
                     border: '1px solid rgba(255,255,255,0.08)',
                     color: hasNext ? '#e2e8f0' : '#475569',
-                    padding: '5px 12px',
+                    padding: '6px 12px',
                     borderRadius: 6,
                     cursor: hasNext ? 'pointer' : 'not-allowed',
                     fontSize: 12,
@@ -221,107 +370,6 @@ export default function App() {
               <span style={{color:'#64748b', fontSize:12}}>
                 Cutoff: <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong> (D-1 Gate Closure)
               </span>
-            </div>
-
-            {/* Week-wise horizontal calendar card */}
-            <div style={{
-              background:'#0f172a',
-              border:'1px solid rgba(255,255,255,0.06)',
-              borderRadius:14,
-              padding:'18px 20px',
-              marginBottom:24,
-              boxShadow:'0 4px 16px rgba(0,0,0,0.25)'
-            }}>
-              <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', marginBottom:14, gap:12}}>
-                <div style={{display:'flex', alignItems:'center', gap:10}}>
-                  <span style={{fontSize:14, fontWeight:700, color:'#f8fafc', textTransform:'uppercase', letterSpacing:'0.04em'}}>
-                    January 2026 Delivery Calendar — Week-Wise View
-                  </span>
-                  <span style={{fontSize:12, color:'#64748b'}}>
-                    (Click any day to switch date)
-                  </span>
-                </div>
-              </div>
-
-
-
-              {/* 7-column horizontal week-wise grid */}
-              <div style={{display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:6}}>
-                {DAYS_OF_WEEK.map(w => (
-                  <div key={w} style={{
-                    textAlign:'center',
-                    fontSize:11,
-                    fontWeight:700,
-                    textTransform:'uppercase',
-                    letterSpacing:'0.05em',
-                    color:'#64748b',
-                    padding:'4px 0'
-                  }}>
-                    {w}
-                  </div>
-                ))}
-
-                {CALENDAR_CELLS.map((dayNum, idx) => {
-                  if (!dayNum) {
-                    return <div key={`empty-${idx}`} style={{opacity:0.1}} />
-                  }
-                  const dateStr = `2026-01-${String(dayNum).padStart(2, '0')}`
-                  const isSelected = selDate === dateStr
-                  const dayMetric = monthData?.daily?.find(x => x.date === dateStr)?.metrics
-
-                  return (
-                    <button
-                      key={dateStr}
-                      onClick={() => setSelDate(dateStr)}
-                      style={{
-                        background: isSelected
-                          ? 'linear-gradient(135deg, #0284c7, #0369a1)'
-                          : 'rgba(255,255,255,0.025)',
-                        border: isSelected
-                          ? '1px solid #38bdf8'
-                          : '1px solid rgba(255,255,255,0.06)',
-                        borderRadius: 8,
-                        padding: '6px 4px',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        transition: 'all 0.15s ease',
-                        boxShadow: isSelected ? '0 0 14px rgba(56, 189, 248, 0.4)' : 'none',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: 44,
-                      }}
-                      onMouseEnter={e => {
-                        if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-                      }}
-                      onMouseLeave={e => {
-                        if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.025)'
-                      }}
-                    >
-                      <span style={{
-                        fontSize: 13,
-                        fontWeight: isSelected ? 800 : 600,
-                        color: isSelected ? '#ffffff' : '#e2e8f0',
-                      }}>
-                        {dayNum}
-                      </span>
-                      {dayMetric && (
-                        <span style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          marginTop: 1,
-                          color: isSelected
-                            ? '#e0f2fe'
-                            : dayMetric.accuracy >= 80 ? '#4ade80' : '#fb923c',
-                        }}>
-                          {dayMetric.accuracy}%
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
             </div>
 
             {/* 4 Metric cards */}
