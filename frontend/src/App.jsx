@@ -177,17 +177,15 @@ export default function App() {
         {/* ══════════ DAILY VIEW ══════════ */}
         {tab === 'daily' && (
           <>
-            {/* Delivery Date dropdown option with small popup calendar preview */}
+            {/* Delivery Date dropdown at left, Prev/Next buttons at top right */}
             <div style={{
               display:'flex',
-              flexWrap:'wrap',
               alignItems:'center',
-              justifyContent:'flex-start',
-              gap:12,
+              justifyContent:'space-between',
               marginBottom:22,
               position:'relative'
             }}>
-              {/* Dropdown trigger button */}
+              {/* Top-left: Dropdown trigger button */}
               <div style={{display:'flex', alignItems:'center', gap:8, position:'relative'}}>
                 <span style={{color:'#94a3b8', fontSize:13, fontWeight:600}}>Delivery Date:</span>
                 <button
@@ -331,7 +329,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* Prev / Next buttons */}
+              {/* Top-right: Prev / Next buttons */}
               <div style={{display:'flex', alignItems:'center', gap:6}}>
                 <button
                   type="button"
@@ -366,10 +364,6 @@ export default function App() {
                   Next →
                 </button>
               </div>
-
-              <span style={{color:'#64748b', fontSize:12}}>
-                Cutoff: <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong> (D-1 Gate Closure)
-              </span>
             </div>
 
             {/* 4 Metric cards */}
@@ -411,8 +405,8 @@ export default function App() {
                           <stop offset="95%" stopColor="#22d3ee" stopOpacity={0}/>
                         </linearGradient>
                         <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="10%" stopColor="#f59e0b" stopOpacity={0.25}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                          <stop offset="10%" stopColor="#a78bfa" stopOpacity={0.25}/>
+                          <stop offset="95%" stopColor="#a78bfa" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3"/>
@@ -423,7 +417,7 @@ export default function App() {
                         labelFormatter={l => `Time: ${l} UTC`}/>
                       <Legend formatter={v => v==='actual'?'Actual (FUELHH)':'Day-Ahead Forecast (WINDFOR)'}/>
                       <Area type="monotone" dataKey="actual"   stroke="#22d3ee" fill="url(#gA)" strokeWidth={2.5} name="actual"/>
-                      <Area type="monotone" dataKey="forecast" stroke="#f59e0b" fill="url(#gF)" strokeWidth={2}
+                      <Area type="monotone" dataKey="forecast" stroke="#a78bfa" fill="url(#gF)" strokeWidth={2}
                             strokeDasharray="5 3" name="forecast"/>
                     </AreaChart>
                   </ResponsiveContainer>
