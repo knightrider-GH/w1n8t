@@ -61,6 +61,14 @@ function MetricCard({ label, value, unit, color, note }) {
   )
 }
 
+const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+// Jan 1 2026 is Thursday (col index 3). 3 blank slots before 1st, 31 days, 1 blank slot after 31st (Sun).
+const CALENDAR_CELLS = [
+  null, null, null,
+  ...Array.from({ length: 31 }, (_, i) => i + 1),
+  null
+]
+
 function getPrevDate(str) {
   if (!str) return ''
   const d = new Date(str + 'T00:00:00Z')
@@ -103,6 +111,12 @@ export default function App() {
 
   const m = dayData?.metrics   // shorthand for daily metrics
   const mo = monthData?.overall // shorthand for monthly metrics
+
+  const currIdx = dates.indexOf(selDate)
+  const hasPrev = currIdx > 0
+  const hasNext = currIdx < dates.length - 1
+  const goPrev = () => hasPrev && setSelDate(dates[currIdx - 1])
+  const goNext = () => hasNext && setSelDate(dates[currIdx + 1])
 
   return (
     <div style={S.page}>
@@ -162,17 +176,153 @@ export default function App() {
         {/* ══════════ DAILY VIEW ══════════ */}
         {tab === 'daily' && (
           <>
-            {/* Date picker + context */}
-            <div style={{display:'flex', flexWrap:'wrap', gap:12, alignItems:'center', marginBottom:20}}>
-              <label style={{color:'#94a3b8', fontSize:13}}>
-                📅 Delivery Date:&nbsp;
-                <select style={S.select} value={selDate} onChange={e => setSelDate(e.target.value)}>
-                  {dates.map(d => <option key={d}>{d}</option>)}
-                </select>
-              </label>
-              <span style={{color:'#475569', fontSize:12}}>
-                Showing the latest forecast locked before <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong> (D-1 Gate Closure)
-              </span>
+            {/* Week-wise horizontal calendar card */}
+            <div style={{
+              background:'#0f172a',
+              border:'1px solid rgba(255,255,255,0.06)',
+              borderRadius:14,
+              padding:'18px 20px',
+              marginBottom:24,
+              boxShadow:'0 4px 16px rgba(0,0,0,0.25)'
+            }}>
+              {/* Calendar header with quick navigation */}
+              <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', marginBottom:14, gap:12}}>
+                <div style={{display:'flex', alignItems:'center', gap:10}}>
+                  <span style={{fontSize:15, fontWeight:700, color:'#f8fafc'}}>
+                    📅 January 2026 Delivery Calendar
+                  </span>
+                  <span style={{fontSize:12, color:'#64748b'}}>
+                    Week-wise grid · Click any day to inspect
+                  </span>
+                </div>
+
+                <div style={{display:'flex', flexWrap:'wrap', alignItems:'center', gap:8}}>
+                  <button
+                    onClick={goPrev}
+                    disabled={!hasPrev}
+                    style={{
+                      background: hasPrev ? '#1e293b' : 'transparent',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: hasPrev ? '#e2e8f0' : '#475569',
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      cursor: hasPrev ? 'pointer' : 'not-allowed',
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}>
+                    ← Prev
+                  </button>
+
+                  <span style={{
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    padding: '4px 12px',
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 700
+                  }}>
+                    {selDate}
+                  </span>
+
+                  <button
+                    onClick={goNext}
+                    disabled={!hasNext}
+                    style={{
+                      background: hasNext ? '#1e293b' : 'transparent',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: hasNext ? '#e2e8f0' : '#475569',
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      cursor: hasNext ? 'pointer' : 'not-allowed',
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}>
+                    Next →
+                  </button>
+
+                  <span style={{color:'#64748b', fontSize:12, marginLeft:6}}>
+                    Cutoff: <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* 7-column horizontal week-wise grid */}
+              <div style={{display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:6}}>
+                {DAYS_OF_WEEK.map(w => (
+                  <div key={w} style={{
+                    textAlign:'center',
+                    fontSize:11,
+                    fontWeight:700,
+                    textTransform:'uppercase',
+                    letterSpacing:'0.05em',
+                    color:'#64748b',
+                    padding:'4px 0'
+                  }}>
+                    {w}
+                  </div>
+                ))}
+
+                {CALENDAR_CELLS.map((dayNum, idx) => {
+                  if (!dayNum) {
+                    return <div key={`empty-${idx}`} style={{opacity:0.1}} />
+                  }
+                  const dateStr = `2026-01-${String(dayNum).padStart(2, '0')}`
+                  const isSelected = selDate === dateStr
+                  const dayMetric = monthData?.daily?.find(x => x.date === dateStr)?.metrics
+
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => setSelDate(dateStr)}
+                      style={{
+                        background: isSelected
+                          ? 'linear-gradient(135deg, #0284c7, #0369a1)'
+                          : 'rgba(255,255,255,0.025)',
+                        border: isSelected
+                          ? '1px solid #38bdf8'
+                          : '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: 8,
+                        padding: '6px 4px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s ease',
+                        boxShadow: isSelected ? '0 0 14px rgba(56, 189, 248, 0.4)' : 'none',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 44,
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.025)'
+                      }}
+                    >
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: isSelected ? 800 : 600,
+                        color: isSelected ? '#ffffff' : '#e2e8f0',
+                      }}>
+                        {dayNum}
+                      </span>
+                      {dayMetric && (
+                        <span style={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          marginTop: 1,
+                          color: isSelected
+                            ? '#e0f2fe'
+                            : dayMetric.accuracy >= 80 ? '#4ade80' : '#fb923c',
+                        }}>
+                          {dayMetric.accuracy}%
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* 4 Metric cards */}
