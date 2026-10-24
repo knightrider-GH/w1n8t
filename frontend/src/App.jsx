@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect } from 'react'
 import {
-  AreaChart, Area, BarChart, Bar,
+  AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Legend
 } from 'recharts'
@@ -247,13 +247,14 @@ export default function App() {
                       <Tooltip {...tooltipStyle}
                         formatter={v => [`${v.toLocaleString()} MW`, 'Error (Forecast − Actual)']}
                         labelFormatter={l => `Time: ${l} UTC`}/>
-                      <Bar dataKey="error" name="Error"
-                           fill="#f59e0b"
-                           shape={props => {
-                             const {x,y,width,height,value} = props
-                             return <rect x={x} y={y} width={width} height={height}
-                                          fill={value>=0?'#f59e0b':'#34d399'} rx={2}/>
-                           }}/>
+                      <Bar dataKey="error" name="Error">
+                        {(dayData?.data || []).map((entry, index) => (
+                          <Cell
+                            key={`err-${index}`}
+                            fill={entry.error >= 0 ? '#f59e0b' : '#34d399'}
+                          />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
