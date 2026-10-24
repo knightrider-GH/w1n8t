@@ -16,37 +16,39 @@ import {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const S = {
-  page:   { minHeight:'100vh', background:'#0b1120', color:'#e2e8f0', fontFamily:'Inter, sans-serif', fontSize:14 },
-  header: { display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between',
-            padding:'16px 28px', borderBottom:'1px solid #1e293b', background:'#0f172a', gap:12 },
-  logo:   { display:'flex', alignItems:'center', gap:10 },
-  badge:  { background:'#0e4f6b', color:'#7dd3fc', border:'1px solid #0284c7',
-            borderRadius:99, padding:'2px 10px', fontSize:12, fontWeight:600 },
-  controls: { display:'flex', flexWrap:'wrap', gap:10, alignItems:'center' },
-  select: { background:'#1e293b', border:'1px solid #334155', color:'#e2e8f0',
-            borderRadius:8, padding:'6px 12px', fontSize:14, cursor:'pointer' },
-  tabs:   { display:'flex', background:'#1e293b', borderRadius:8, padding:3, gap:3 },
-  tab:    (active) => ({
-    padding:'6px 14px', borderRadius:6, fontSize:13, fontWeight:600, cursor:'pointer', border:'none',
-    background: active ? '#0ea5e9' : 'transparent',
-    color:      active ? '#0f172a' : '#94a3b8',
+  page:     { minHeight:'100vh', background:'#0b1120', color:'#e2e8f0', fontFamily:'Inter, sans-serif', fontSize:14 },
+  header:   { display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between',
+              padding:'14px 28px', borderBottom:'1px solid rgba(255,255,255,0.06)', background:'#0f172a', gap:12 },
+  logo:     { display:'flex', alignItems:'center', gap:12 },
+  controls: { display:'flex', flexWrap:'wrap', gap:12, alignItems:'center' },
+  select:   { background:'#1e293b', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0',
+              borderRadius:8, padding:'6px 12px', fontSize:13, cursor:'pointer', outline:'none' },
+  tabs:     { display:'flex', background:'#1e293b', borderRadius:8, padding:3, gap:3 },
+  tab:      (active) => ({
+    padding:'7px 16px', borderRadius:6, fontSize:13, fontWeight:600, cursor:'pointer', border:'none',
+    background: active ? '#0284c7' : 'transparent',
+    color:      active ? '#ffffff' : '#94a3b8',
+    transition: 'all 0.15s ease',
   }),
-  main:   { maxWidth:1100, margin:'0 auto', padding:'24px 20px' },
-  grid4:  { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16, marginBottom:24 },
-  card:   { background:'#0f172a', border:'1px solid #1e293b', borderRadius:14, padding:18 },
-  label:  { fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'#64748b' },
-  big:    (color='#e2e8f0') => ({ fontSize:28, fontWeight:800, color, margin:'4px 0' }),
-  sub:    { fontSize:12, color:'#64748b' },
-  chart:  { background:'#0f172a', border:'1px solid #1e293b', borderRadius:14, padding:'20px 16px', marginBottom:24 },
-  tip:    { background:'#0f172a', border:'1px solid #334155', borderRadius:10, color:'#e2e8f0', padding:'10px 14px' },
-  table:  { width:'100%', borderCollapse:'collapse', fontSize:13 },
-  th:     { padding:'10px 14px', textAlign:'left', background:'#0f172a', color:'#64748b',
-            fontSize:11, fontWeight:700, textTransform:'uppercase', position:'sticky', top:0 },
-  td:     { padding:'9px 14px', borderBottom:'1px solid #1e293b' },
+  main:     { maxWidth:1100, margin:'0 auto', padding:'28px 20px' },
+  grid4:    { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16, marginBottom:24 },
+  card:     { background:'#0f172a', border:'1px solid rgba(255,255,255,0.06)', borderRadius:14, padding:18,
+              boxShadow:'0 4px 16px rgba(0,0,0,0.25)' },
+  label:    { fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'#64748b' },
+  big:      (color='#e2e8f0') => ({ fontSize:26, fontWeight:800, color, margin:'4px 0' }),
+  sub:      { fontSize:12, color:'#64748b' },
+  chart:    { background:'#0f172a', border:'1px solid rgba(255,255,255,0.06)', borderRadius:14, padding:'20px 18px',
+              marginBottom:24, boxShadow:'0 4px 16px rgba(0,0,0,0.25)' },
+  tip:      { background:'#0f172a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#e2e8f0', padding:'10px 14px' },
+  table:    { width:'100%', borderCollapse:'collapse', fontSize:13 },
+  th:       { padding:'10px 14px', textAlign:'left', background:'#0f172a', color:'#64748b',
+              fontSize:11, fontWeight:700, textTransform:'uppercase', position:'sticky', top:0,
+              borderBottom:'1px solid rgba(255,255,255,0.08)' },
+  td:       { padding:'10px 14px', borderBottom:'1px solid rgba(255,255,255,0.05)' },
 }
 
 // Tooltip styling for recharts
-const tooltipStyle = { contentStyle: S.tip, cursor:{ stroke:'#334155' } }
+const tooltipStyle = { contentStyle: S.tip, cursor:{ stroke:'rgba(255,255,255,0.1)' } }
 
 // ─── Metric card component ─────────────────────────────────────────────────────
 function MetricCard({ label, value, unit, color, note }) {
@@ -57,6 +59,13 @@ function MetricCard({ label, value, unit, color, note }) {
       <div style={S.sub}>{note}</div>
     </div>
   )
+}
+
+function getPrevDate(str) {
+  if (!str) return ''
+  const d = new Date(str + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
@@ -101,11 +110,30 @@ export default function App() {
       {/* ── Header ── */}
       <header style={S.header}>
         <div style={S.logo}>
-          <span style={{fontSize:22}}>💨</span>
+          <div style={{
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: 'linear-gradient(135deg, #06b6d4, #2563eb)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(6, 182, 212, 0.3)',
+            flexShrink: 0
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+              <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+              <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+            </svg>
+          </div>
           <div>
-            <strong style={{fontSize:17}}>VoltWise UK</strong>{' '}
-            <span style={S.badge}>Day-Ahead Wind Procurement</span>
-            <div style={{fontSize:11, color:'#64748b'}}>Elexon BMRS · January 2026 · National GB Wind</div>
+            <div style={{fontSize:18, fontWeight:700, color:'#ffffff', letterSpacing:'-0.02em', lineHeight:1.2}}>
+              VoltWise UK
+            </div>
+            <div style={{fontSize:12, color:'#94a3b8', marginTop:2}}>
+              Day-Ahead Wind Procurement · National Grid GB
+            </div>
           </div>
         </div>
 
@@ -143,7 +171,7 @@ export default function App() {
                 </select>
               </label>
               <span style={{color:'#475569', fontSize:12}}>
-                Showing the latest forecast locked before <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {selDate.slice(0,7)}-{String(+selDate.slice(8)-1).padStart(2,'0')}</strong> (D-1 Gate Closure)
+                Showing the latest forecast locked before <strong style={{color:'#7dd3fc'}}>{cutoff}:00 UTC on {getPrevDate(selDate)}</strong> (D-1 Gate Closure)
               </span>
             </div>
 
@@ -190,7 +218,7 @@ export default function App() {
                           <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
+                      <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3"/>
                       <XAxis dataKey="time" stroke="#475569" tick={{fontSize:11}}/>
                       <YAxis stroke="#475569" tick={{fontSize:11}} tickFormatter={v=>`${(v/1000).toFixed(0)}k`}/>
                       <Tooltip {...tooltipStyle}
@@ -212,7 +240,7 @@ export default function App() {
                   </p>
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={dayData?.data || []}>
-                      <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
+                      <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3"/>
                       <XAxis dataKey="time" stroke="#475569" tick={{fontSize:10}}/>
                       <YAxis stroke="#475569" tick={{fontSize:11}}/>
                       <ReferenceLine y={0} stroke="#475569"/>
@@ -261,7 +289,7 @@ export default function App() {
                   mae:  d.metrics.mae,
                   bias: d.metrics.bias,
                 }))}>
-                  <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
+                  <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3"/>
                   <XAxis dataKey="day" stroke="#475569" tick={{fontSize:11}} label={{value:'Day of January', position:'insideBottom', offset:-2, fill:'#64748b', fontSize:11}}/>
                   <YAxis stroke="#475569" tick={{fontSize:11}} unit=" MW"/>
                   <Tooltip {...tooltipStyle} labelFormatter={d=>`Jan ${d}, 2026`}
@@ -286,7 +314,7 @@ export default function App() {
                 <tbody>
                   {monthData.daily.map(d => (
                     <tr key={d.date} style={{cursor:'pointer'}}
-                        onMouseEnter={e=>e.currentTarget.style.background='#1e293b'}
+                        onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.04)'}
                         onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                       <td style={{...S.td, fontWeight:600}}>{d.date}</td>
                       <td style={S.td}>{d.metrics.avgActual?.toLocaleString()}</td>
@@ -299,8 +327,8 @@ export default function App() {
                       <td style={{...S.td, color:'#4ade80'}}>{d.metrics.accuracy}%</td>
                       <td style={S.td}>
                         <button onClick={()=>{setTab('daily');setSelDate(d.date)}}
-                          style={{background:'transparent', border:'1px solid #334155', color:'#7dd3fc',
-                                  borderRadius:6, padding:'3px 10px', cursor:'pointer', fontSize:12}}>
+                          style={{background:'rgba(56, 189, 248, 0.1)', border:'1px solid rgba(56, 189, 248, 0.25)', color:'#7dd3fc',
+                                  borderRadius:6, padding:'4px 12px', cursor:'pointer', fontSize:12, fontWeight:500}}>
                           Inspect
                         </button>
                       </td>
@@ -314,7 +342,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer style={{borderTop:'1px solid #1e293b', textAlign:'center', padding:'14px', color:'#475569', fontSize:12}}>
+      <footer style={{borderTop:'1px solid rgba(255,255,255,0.06)', textAlign:'center', padding:'18px', color:'#64748b', fontSize:12}}>
         Data: Elexon BMRS (FUELHH & WINDFOR) · January 2026 · Built with React + Python (FastAPI)
       </footer>
     </div>
