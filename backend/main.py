@@ -31,7 +31,13 @@ app.add_middleware(
 # Load cached Elexon data (Decision window: Jan 2026)
 # ─────────────────────────────────────────────
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CACHE = os.path.join(BASE, "data_cache")
+CANDIDATE_CACHE_DIRS = [
+    os.path.join(BASE, "data_cache"),
+    os.path.join(os.getcwd(), "data_cache"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_cache"),
+    "/var/task/data_cache",
+]
+CACHE = next((d for d in CANDIDATE_CACHE_DIRS if os.path.exists(d)), CANDIDATE_CACHE_DIRS[0])
 
 with open(os.path.join(CACHE, "fuelhh_jan2026.json")) as f:
     raw_actuals = json.load(f)
@@ -306,12 +312,14 @@ build_cache()
 # API Endpoints
 # ─────────────────────────────────────────────
 @app.get("/api/dates")
+@app.get("/dates")
 def get_dates():
     """All January 2026 delivery dates."""
     return {"dates": DATES}
 
 
 @app.get("/api/day")
+@app.get("/day")
 def get_day(date: str = Query("2026-01-01"), cutoff_hour: int = Query(12)):
     """
     Time-series & procurement decision metrics for a single delivery day.
@@ -328,6 +336,7 @@ def get_day(date: str = Query("2026-01-01"), cutoff_hour: int = Query(12)):
 
 
 @app.get("/api/month")
+@app.get("/month")
 def get_month(cutoff_hour: int = Query(12)):
     """
     Monthly evaluation payload:

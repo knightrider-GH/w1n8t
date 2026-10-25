@@ -139,14 +139,13 @@ heroku open --app voltwise-uk-wind-dashboard
 3. Select **Docker** environment (Render detects the root `Dockerfile` automatically).
 4. Click **Deploy Web Service**.
 
-### Method 3: Vercel (Frontend) + Backend API
-If deploying the frontend independently on Vercel:
-1. Import `knightrider-GH/w1n8t` into Vercel and set the **Root Directory** to `frontend`.
-2. Add the environment variable in Vercel settings:
-   ```env
-   VITE_API_URL=https://voltwise-uk-wind-dashboard.onrender.com
-   ```
-3. Deploy! Vercel serves the React UI and connects directly to the Python FastAPI backend.
+### Method 3: Vercel (1-Click Full-Stack Deployment — React + Python on Same Domain)
+The repository is pre-configured for Vercel Serverless (`vercel.json`, `api/index.py`, root `requirements.txt`, and root `package.json`):
+1. Navigate to **[vercel.com](https://vercel.com/)** → **Add New Project**.
+2. Import your GitHub repository: **`knightrider-GH/w1n8t`**.
+3. Leave all settings at default — Vercel detects `vercel.json` automatically, builds the React frontend to `frontend/dist`, and provisions the FastAPI Python runtime for `/api/*`.
+4. Click **Deploy**!
+> Both the React UI and Python FastAPI backend run together on the same `.vercel.app` domain with zero configuration and zero cold-start issues.
 
 ---
 
