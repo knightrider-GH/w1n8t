@@ -110,7 +110,7 @@ docker compose up --build
 
 ## 4. Live Deployment Guide
 
-> **Live Application URL**: `https://voltwise-uk-wind-dashboard.onrender.com` *(Configured on Render / Heroku / Vercel)*
+> **Live Application URL**: [https://w1n8t.vercel.app/](https://w1n8t.vercel.app/) *(Configured for instant load on Vercel)*
 
 ### Method 1: Heroku (Docker Container Registry)
 The repository includes a production multi-stage `Dockerfile` ready for Heroku's Container Runtime:
