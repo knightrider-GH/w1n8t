@@ -36,6 +36,48 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #334155;
     }
+
+    /* Fix Recharts tooltip text colors on dark mode */
+    .recharts-default-tooltip {
+      background-color: #0f172a !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 10px !important;
+      color: #f8fafc !important;
+    }
+    .recharts-tooltip-item,
+    .recharts-tooltip-item-name,
+    .recharts-tooltip-item-separator,
+    .recharts-tooltip-item-value {
+      color: #f8fafc !important;
+    }
+    .recharts-tooltip-label {
+      color: #94a3b8 !important;
+      font-weight: 600 !important;
+    }
+
+    /* Subtle floating bounce animation for hero scroll indicator */
+    @keyframes floatBounce {
+      0%, 100% {
+        transform: translate(-50%, 0);
+        opacity: 0.65;
+      }
+      50% {
+        transform: translate(-50%, 8px);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive grid symmetry for 4-column KPI cards */
+    @media (max-width: 820px) {
+      .grid-4-cols {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+    }
+    @media (max-width: 480px) {
+      .grid-4-cols {
+        grid-template-columns: 1fr !important;
+      }
+    }
   </style>
 </head>
 <body style="margin:0; padding:0; background:#0b1120;">
