@@ -108,44 +108,13 @@ docker compose up --build
 
 ---
 
-## 4. Live Deployment Guide
+## 4. Production Deployment
 
-> **Live Application URL**: [https://w1n8t.vercel.app/](https://w1n8t.vercel.app/) *(Configured for instant load on Vercel)*
+The platform is deployed live on Vercel with serverless Python execution and React edge hosting:
 
-### Method 1: Heroku (Docker Container Registry)
-The repository includes a production multi-stage `Dockerfile` ready for Heroku's Container Runtime:
-
-```bash
-# 1. Login to Heroku and Heroku Container Registry
-heroku login
-heroku container:login
-
-# 2. Create your Heroku application
-heroku create voltwise-uk-wind-dashboard
-
-# 3. Build and push the Docker container to Heroku
-heroku container:push web --app voltwise-uk-wind-dashboard
-
-# 4. Release the container
-heroku container:release web --app voltwise-uk-wind-dashboard
-
-# 5. Open the live app
-heroku open --app voltwise-uk-wind-dashboard
-```
-
-### Method 2: Render.com (1-Click Docker Web Service — Free)
-1. Navigate to **[dashboard.render.com](https://dashboard.render.com/)** and click **New +** → **Web Service**.
-2. Select your connected GitHub repo: `knightrider-GH/w1n8t`.
-3. Select **Docker** environment (Render detects the root `Dockerfile` automatically).
-4. Click **Deploy Web Service**.
-
-### Method 3: Vercel (1-Click Full-Stack Deployment — React + Python on Same Domain)
-The repository is pre-configured for Vercel Serverless (`vercel.json`, `api/index.py`, root `requirements.txt`, and root `package.json`):
-1. Navigate to **[vercel.com](https://vercel.com/)** → **Add New Project**.
-2. Import your GitHub repository: **`knightrider-GH/w1n8t`**.
-3. Leave all settings at default — Vercel detects `vercel.json` automatically, builds the React frontend to `frontend/dist`, and provisions the FastAPI Python runtime for `/api/*`.
-4. Click **Deploy**!
-> Both the React UI and Python FastAPI backend run together on the same `.vercel.app` domain with zero configuration and zero cold-start issues.
+* **Live Application URL**: [https://w1n8t.vercel.app/](https://w1n8t.vercel.app/)
+* **Architecture**: Configured via `vercel.json` and `api/index.py` to route `/api/*` requests to the FastAPI ASGI runtime while serving the precompiled React frontend from Vercel's global CDN on the same domain.
+* **Continuous Deployment**: Connected to the `main` branch of this repository for automated builds on push.
 
 ---
 
