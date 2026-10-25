@@ -107,9 +107,11 @@ const CALENDAR_CELLS = [
   null
 ]
 
+const JAN_2026_DATES = Array.from({ length: 31 }, (_, i) => `2026-01-${String(i + 1).padStart(2, '0')}`)
+
 export default function App() {
   const [tab,        setTab]        = useState('daily')      // 'daily' | 'monthly'
-  const [dates,      setDates]      = useState([])           // all Jan 2026 dates
+  const [dates,      setDates]      = useState(JAN_2026_DATES) // all Jan 2026 dates (preloaded)
   const [selDate,    setSelDate]    = useState('2026-01-01') // selected delivery date
   const [cutoff,     setCutoff]     = useState(12)           // D-1 gate closure hour
   const [dayData,    setDayData]    = useState(null)         // {data, metrics, procurementSummary}
@@ -120,8 +122,8 @@ export default function App() {
   // Load available dates once
   useEffect(() => {
     fetch(`${API_BASE}/api/dates`)
-      .then(r => r.json())
-      .then(r => { setDates(r.dates); setSelDate(r.dates[0]) })
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
+      .then(r => { if (r.dates && r.dates.length > 0) setDates(r.dates) })
       .catch(console.error)
   }, [])
 
@@ -130,17 +132,17 @@ export default function App() {
     if (!selDate) return
     setLoading(true)
     fetch(`${API_BASE}/api/day?date=${selDate}&cutoff_hour=${cutoff}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
       .then(r => { setDayData(r); setLoading(false) })
-      .catch(console.error)
+      .catch(err => { console.error('Error fetching day data:', err); setLoading(false) })
   }, [selDate, cutoff])
 
   // Load monthly data whenever cutoff changes
   useEffect(() => {
     fetch(`${API_BASE}/api/month?cutoff_hour=${cutoff}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
       .then(setMonthData)
-      .catch(console.error)
+      .catch(err => console.error('Error fetching month data:', err))
   }, [cutoff])
 
   const m = dayData?.metrics

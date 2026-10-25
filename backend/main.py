@@ -30,19 +30,45 @@ app.add_middleware(
 # ─────────────────────────────────────────────
 # Load cached Elexon data (Decision window: Jan 2026)
 # ─────────────────────────────────────────────
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DIR_THIS = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(DIR_THIS)
 CANDIDATE_CACHE_DIRS = [
-    os.path.join(BASE, "data_cache"),
+    os.path.join(DIR_THIS, "data_cache"),                    # backend/data_cache (inside Vercel backend service)
+    os.path.join(BASE, "data_cache"),                        # ../data_cache (repository root)
+    os.path.join(os.getcwd(), "backend", "data_cache"),
     os.path.join(os.getcwd(), "data_cache"),
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_cache"),
+    "/var/task/backend/data_cache",
     "/var/task/data_cache",
 ]
-CACHE = next((d for d in CANDIDATE_CACHE_DIRS if os.path.exists(d)), CANDIDATE_CACHE_DIRS[0])
 
-with open(os.path.join(CACHE, "fuelhh_jan2026.json")) as f:
+def resolve_cache_file(fname: str) -> str:
+    """Finds static cache file across candidate locations."""
+    for d in CANDIDATE_CACHE_DIRS:
+        p = os.path.join(d, fname)
+        if os.path.exists(p):
+            return p
+    raise FileNotFoundError(f"Cannot find {fname} in any of {CANDIDATE_CACHE_DIRS}")
+
+def get_writable_dir(subfolder: str = "") -> str:
+    """Returns a writable directory, falling back to /tmp if local filesystem is read-only."""
+    target = os.path.join(DIR_THIS, subfolder) if subfolder else DIR_THIS
+    try:
+        test_file = os.path.join(target, ".write_test")
+        with open(test_file, "w") as f:
+            f.write("ok")
+        os.remove(test_file)
+        return target
+    except (OSError, PermissionError):
+        tmp = os.path.join("/tmp", subfolder) if os.name != "nt" else os.path.join(os.environ.get("TEMP", "C:\\temp"), subfolder)
+        os.makedirs(tmp, exist_ok=True)
+        return tmp
+
+CACHE = os.path.dirname(resolve_cache_file("fuelhh_jan2026.json"))
+
+with open(resolve_cache_file("fuelhh_jan2026.json")) as f:
     raw_actuals = json.load(f)
 
-with open(os.path.join(CACHE, "windfor_jan2026.json")) as f:
+with open(resolve_cache_file("windfor_jan2026.json")) as f:
     raw_forecasts = json.load(f)
 
 # Actuals: 30-min settlement resolution (FUELHH)
