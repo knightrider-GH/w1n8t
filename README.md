@@ -6,6 +6,18 @@ The platform quantifies forecast risk, models required thermal backup hedges, ev
 
 ---
 
+## Visual Platform Preview
+
+| Parallax Hero Landing | Daily Procurement View (Safe Wind Baseline) |
+|:---:|:---:|
+| ![Hero Overview](docs/screenshots/01_hero_overview.png) | ![Daily View](docs/screenshots/02_daily_procurement_view.png) |
+
+| Monthly Evaluation & Gate Closure Sensitivity | Diurnal Error Profile & Daily Audit Table |
+|:---:|:---:|
+| ![Monthly Evaluation](docs/screenshots/03_monthly_evaluation.png) | ![Diurnal and Audit](docs/screenshots/04_diurnal_profile_and_audit.png) |
+
+---
+
 ## 1. Directory & File Structure
 
 ```
@@ -96,16 +108,45 @@ docker compose up --build
 
 ---
 
-## 4. Live Deployment
+## 4. Live Deployment Guide
 
-> **Live Application URL**: `https://voltwise-uk-wind-dashboard.onrender.com` *(Placeholder — configure after pushing to Render / Heroku / Vercel)*
+> **Live Application URL**: `https://voltwise-uk-wind-dashboard.onrender.com` *(Configured on Render / Heroku / Vercel)*
 
-### Cloud Deployment Configuration
-* **Single Container (Render / Heroku / Fly.io)**: Deploy using the included `Dockerfile`. The container automatically builds the React distribution and mounts it under FastAPI, binding dynamically to `${PORT:-8000}`.
-* **Decoupled Frontend (Vercel / Cloudflare Pages)**: Deploy `frontend/` and configure the environment variable:
-  ```env
-  VITE_API_URL=https://your-backend-api.onrender.com
-  ```
+### Method 1: Heroku (Docker Container Registry)
+The repository includes a production multi-stage `Dockerfile` ready for Heroku's Container Runtime:
+
+```bash
+# 1. Login to Heroku and Heroku Container Registry
+heroku login
+heroku container:login
+
+# 2. Create your Heroku application
+heroku create voltwise-uk-wind-dashboard
+
+# 3. Build and push the Docker container to Heroku
+heroku container:push web --app voltwise-uk-wind-dashboard
+
+# 4. Release the container
+heroku container:release web --app voltwise-uk-wind-dashboard
+
+# 5. Open the live app
+heroku open --app voltwise-uk-wind-dashboard
+```
+
+### Method 2: Render.com (1-Click Docker Web Service — Free)
+1. Navigate to **[dashboard.render.com](https://dashboard.render.com/)** and click **New +** → **Web Service**.
+2. Select your connected GitHub repo: `knightrider-GH/w1n8t`.
+3. Select **Docker** environment (Render detects the root `Dockerfile` automatically).
+4. Click **Deploy Web Service**.
+
+### Method 3: Vercel (Frontend) + Backend API
+If deploying the frontend independently on Vercel:
+1. Import `knightrider-GH/w1n8t` into Vercel and set the **Root Directory** to `frontend`.
+2. Add the environment variable in Vercel settings:
+   ```env
+   VITE_API_URL=https://voltwise-uk-wind-dashboard.onrender.com
+   ```
+3. Deploy! Vercel serves the React UI and connects directly to the Python FastAPI backend.
 
 ---
 
